@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位行為研究測試</title>
+    <style>
+        :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 550px; text-align: center; }
+        #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+        #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 20px; font-weight: 500; }
+        .highlight { display: block; margin-top: 15px; font-size: 24px; font-weight: 800; color: var(--text-dark); text-shadow: 0px 2px 4px rgba(74, 144, 226, 0.1); }
+        #options-container { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 17px; background: #fff; color: #4a5568; }
+        .option-box:hover { border-color: var(--primary); background: #ebf4ff; color: var(--primary); transform: translateY(-2px); }
+        .option-box:active { transform: scale(0.97); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-section">
+        <div id="progress">STEP 1 / 3</div>
+        <div id="question-title">載入中...</div>
+        <div id="options-container"></div>
+    </div>
+
+    <div id="thank-you" class="hidden">
+        <h2>✨ 感謝您的回答 ✨</h2>
+        <p>數據已成功記錄，這將有助於我們的數位行為研究。</p>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { 
+            id: 'q1', 
+            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br>
+                    <span class="highlight">＂請回憶，演算法經常將哪一類內容推到你眼前？＂</span>`, 
+            pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'] 
+        },
+        { 
+            id: 'q2', 
+            title: '在這些推播中，<br>哪一種風格最容易讓你停下手指？', 
+            pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'] 
+        },
+        { 
+            id: 'q3', 
+            title: '如果可以選擇，<br>你希望未來的數位生活更趨向於？', 
+            pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'] 
+        }
+    ];
+
+    let currentQIndex = 0;
+    let displayOptions = []; 
+    let userSelections = []; 
+
+    function initQuestion() {
+        const q = questions[currentQIndex];
+        if (!q) { showThankYou(); return; }
+        document.getElementById('progress').innerText = `STEP ${currentQIndex + 1} / ${questions.length}`;
+        document.getElementById('question-title').innerHTML = q.title;
+        q.pool = shuffle([...q.pool]);
+        displayOptions = q.pool.splice(0, 4);
+        renderOptions();
+    }
+
+    function renderOptions() {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        displayOptions.forEach((opt, index) => {
+            const div = document.createElement('div');
+            div.className = 'option-box';
+            div.innerText = opt;
+            div.onclick = () => handleSelect(index);
+            container.appendChild(div);
+        });
+    }
+
+    function handleSelect(index) {
+        const q = questions[currentQIndex];
+        userSelections.push({ question: q.id, answer: displayOptions[index] });
+
+        if (q.pool.length > 0) {
+            displayOptions[index] = q.pool.shift();
+            renderOptions();
+        } else {
+            nextQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQIndex++;
+        if (currentQIndex < questions.length) {
+            initQuestion();
+        } else {
+            showThankYou();
+        }
+    }
+
+    function showThankYou() {
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('thank-you').classList.remove('hidden');
+        
+        // --- 核心改動：使用 ISO 8601 格式 ---
+        const now = new Date();
+        const isoTimestamp = now.toISOString(); 
+
+        let payload = {
+            "填答時間": isoTimestamp
+        };
+
+        userSelections.forEach(selection => {
+            payload[selection.answer] = "✔"; 
+        });
+
+        // 請替換為你從 Power Automate 取得的網址
+        const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1"; 
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload) 
+        })
+        .then(response => {
+            if (response.ok) console.log("傳送成功 (ISO 8601)");
+        })
+        .catch(error => console.error("傳送錯誤：", error));
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    initQuestion();
+</script>
+
+</body>
+</html>
