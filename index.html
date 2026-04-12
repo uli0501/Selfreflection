@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>魚缸測試</title>
+    <title>魚缸測試 - 分析報告</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; --card-bg: #ffffff; }
@@ -22,10 +22,10 @@
 
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
         
-        /* 問題文字改為置中對齊 */
+        /* 問題文字置中對齊 */
         #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: center; }
         
-        /* 重點文字改為置中對齊 */
+        /* 重點文字置中對齊 */
         .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-align: center; }
         
         #options-container { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
@@ -33,7 +33,7 @@
         .option-box:hover { border-color: var(--primary); background: #ebf4ff; color: var(--primary); transform: translateY(-2px); }
         
         /* 感謝頁面與圖表佈局 */
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 30px; }
         .chart-item { background: #fdfdfd; padding: 15px; border-radius: 15px; border: 1px solid #f0f4f8; }
         .chart-item h4 { font-size: 14px; color: #718096; margin-bottom: 10px; }
 
@@ -87,7 +87,7 @@
         { 
             id: 'q2', 
             title:  `如同經營水族店，數位平台也為你調配視界。<br>
-                    <span class="highlight">對於不感興趣的資訊，你通常怎麼處理？</span></span>`,
+                    <span class="highlight">對於不感興趣的資訊，你通常怎麼處理？</span>`,
             pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'] 
         },
         { 
@@ -147,10 +147,7 @@
     function showThankYou() {
         document.getElementById('quiz-section').classList.add('hidden');
         document.getElementById('thank-you').classList.remove('hidden');
-        
-        // 發送數據
         sendDataToWebhook();
-        // 渲染圖表
         renderCharts();
     }
 
@@ -163,10 +160,43 @@
     }
 
     function renderCharts() {
-        const cfg = { type: 'pie', options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } };
-        new Chart(document.getElementById('chart1'), { ...cfg, data: { labels: ['美食', '迷因', '追星', '知識', '其他'], datasets: [{ data: [35, 25, 15, 15, 10], backgroundColor: ['#4A90E2', '#63B3ED', '#90CDF4', '#BEE3F8', '#E2E8F0'] }] } });
-        new Chart(document.getElementById('chart2'), { ...cfg, data: { labels: ['就滑掉', '按不感興趣', '取消追蹤', '默默看完', '其他'], datasets: [{ data: [45, 20, 15, 10, 10], backgroundColor: ['#48BB78', '#68D391', '#9AE6B4', '#C6F6D5', '#F0FFF4'] }] } });
-        new Chart(document.getElementById('chart3'), { ...cfg, data: { labels: ['風趣', '專業', '自信', '努力', '其他'], datasets: [{ data: [30, 30, 20, 10, 10], backgroundColor: ['#ED8936', '#F6AD55', '#FBD38D', '#FEEBC8', '#FFFAF0'] }] } });
+        const cfg = { type: 'pie', options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, padding: 10 } } } } };
+        
+        // 圖表 1：完整列出 10 個細項
+        new Chart(document.getElementById('chart1'), { 
+            ...cfg, 
+            data: { 
+                labels: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'], 
+                datasets: [{ 
+                    data: [20, 15, 12, 10, 10, 8, 8, 7, 5, 5], 
+                    backgroundColor: ['#4A90E2', '#63B3ED', '#90CDF4', '#BEE3F8', '#48BB78', '#68D391', '#9AE6B4', '#F6AD55', '#FBD38D', '#E2E8F0'] 
+                }] 
+            } 
+        });
+
+        // 圖表 2：完整列出 6 個細項
+        new Chart(document.getElementById('chart2'), { 
+            ...cfg, 
+            data: { 
+                labels: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'], 
+                datasets: [{ 
+                    data: [15, 15, 10, 20, 35, 5], 
+                    backgroundColor: ['#F56565', '#ED8936', '#ECC94B', '#48BB78', '#4299E1', '#A0AEC0'] 
+                }] 
+            } 
+        });
+
+        // 圖表 3：完整列出 6 個細項
+        new Chart(document.getElementById('chart3'), { 
+            ...cfg, 
+            data: { 
+                labels: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'], 
+                datasets: [{ 
+                    data: [25, 15, 20, 15, 10, 15], 
+                    backgroundColor: ['#9F7AEA', '#ED64A6', '#667EEA', '#4FD1C5', '#F6AD55', '#FC8181'] 
+                }] 
+            } 
+        });
     }
 
     function shuffle(array) {
