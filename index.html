@@ -73,7 +73,6 @@
 </div>
 
 <script>
-    // 註冊 DataLabels 插件
     Chart.register(ChartDataLabels);
 
     const questions = [
@@ -159,19 +158,15 @@
     }
 
     function renderCharts() {
-        // 圖表通用設定：移除圖例，並開啟 DataLabels 功能
         const commonOptions = {
             plugins: {
-                legend: { display: false }, // 移除下方的細項標籤
+                legend: { display: false },
                 datalabels: {
                     color: '#fff',
                     font: { weight: 'bold', size: 11 },
                     formatter: (value, ctx) => {
-                        let sum = 0;
-                        let dataArr = ctx.chart.data.datasets[0].data;
-                        dataArr.map(data => { sum += data; });
-                        let percentage = (value * 100 / sum).toFixed(0) + "%";
-                        return ctx.chart.data.labels[ctx.dataIndex] + "\n" + percentage;
+                        // 改為顯示項目名稱 + 總計數值
+                        return ctx.chart.data.labels[ctx.dataIndex] + "\n" + value;
                     },
                     textAlign: 'center'
                 }
@@ -180,7 +175,7 @@
 
         const cfg = { type: 'pie', options: commonOptions };
         
-        // 圖表 1：10 個細項
+        // 圖表 1
         new Chart(document.getElementById('chart1'), { 
             ...cfg, 
             data: { 
@@ -192,7 +187,7 @@
             } 
         });
 
-        // 圖表 2：6 個細項
+        // 圖表 2
         new Chart(document.getElementById('chart2'), { 
             ...cfg, 
             data: { 
@@ -204,7 +199,7 @@
             } 
         });
 
-        // 圖表 3：6 個細項
+        // 圖表 3
         new Chart(document.getElementById('chart3'), { 
             ...cfg, 
             data: { 
