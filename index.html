@@ -164,7 +164,7 @@
 
     function renderCharts() {
         const cfg = { type: 'pie', options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } };
-        new Chart(document.getElementById('chart1'), { ...cfg, data: { labels: ['美食', '迷隱', '追星', '知識', '其他'], datasets: [{ data: [35, 25, 15, 15, 10], backgroundColor: ['#4A90E2', '#63B3ED', '#90CDF4', '#BEE3F8', '#E2E8F0'] }] } });
+        new Chart(document.getElementById('chart1'), { ...cfg, data: { labels: ['美食', '迷因', '追星', '知識', '其他'], datasets: [{ data: [35, 25, 15, 15, 10], backgroundColor: ['#4A90E2', '#63B3ED', '#90CDF4', '#BEE3F8', '#E2E8F0'] }] } });
         new Chart(document.getElementById('chart2'), { ...cfg, data: { labels: ['就滑掉', '按不感興趣', '取消追蹤', '默默看完', '其他'], datasets: [{ data: [45, 20, 15, 10, 10], backgroundColor: ['#48BB78', '#68D391', '#9AE6B4', '#C6F6D5', '#F0FFF4'] }] } });
         new Chart(document.getElementById('chart3'), { ...cfg, data: { labels: ['風趣', '專業', '自信', '努力', '其他'], datasets: [{ data: [30, 30, 20, 10, 10], backgroundColor: ['#ED8936', '#F6AD55', '#FBD38D', '#FEEBC8', '#FFFAF0'] }] } });
     }
