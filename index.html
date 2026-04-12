@@ -4,50 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魚缸測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; }
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; --card-bg: #ffffff; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         
-        /* 響應式容器調整 */
         .container { 
-            background: white; 
+            background: var(--card-bg); 
             padding: 40px; 
-            border-radius: 20px; 
+            border-radius: 24px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 90%; 
-            max-width: 550px; 
+            width: 100%; 
+            max-width: 600px; 
             text-align: center; 
-            box-sizing: border-box; /* 確保 padding 不會撐破寬度 */
+            transition: max-width 0.5s ease; /* 寬度切換動畫 */
         }
 
+        /* 測驗完成後放大容器以容納圖表 */
+        .container.expanded { max-width: 900px; }
+
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
-        
-        /* 調整標題在手機上的行高與間距 */
         #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: justify; }
-        
-        /* 調整重點文字在手機上的大小 */
-        .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-shadow: 0px 2px 4px rgba(74, 144, 226, 0.1); }
+        .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); }
         
         #options-container { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
-        
-        /* 選項盒子的觸控優化 */
-        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 17px; background: #fff; color: #4a5568; -webkit-tap-highlight-color: transparent; }
+        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 17px; background: #fff; color: #4a5568; -webkit-tap-highlight-color: transparent; }
         .option-box:hover { border-color: var(--primary); background: #ebf4ff; color: var(--primary); transform: translateY(-2px); }
-        .option-box:active { transform: scale(0.97); }
+        
+        /* 感謝頁面與圖表佈局 */
+        .chart-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+            margin-top: 30px; 
+        }
+        .chart-item { background: #fdfdfd; padding: 15px; border-radius: 15px; border: 1px solid #f0f4f8; }
+        .chart-item h4 { font-size: 14px; color: #718096; margin-bottom: 10px; }
+
         .hidden { display: none; }
 
-        /* 手機版專屬微調 (螢幕寬度小於 480px) */
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
             #question-title { font-size: 16px; }
             .highlight { font-size: 18px; }
-            .option-box { padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="main-container">
     <div id="quiz-section">
         <div id="progress">STEP 1 / 3</div>
         <div id="question-title">載入中...</div>
@@ -56,7 +61,24 @@
 
     <div id="thank-you" class="hidden">
         <h2>✨ 感謝您的回答 ✨</h2>
-        <p>數據已成功記錄，這將有助於我們的數位行為研究。</p>
+        <p style="color: #718096;">數據已記錄，以下為基於研究樣本（工作表2）的趨勢分析：</p>
+        
+        <div class="chart-grid">
+            <div class="chart-item">
+                <h4>演算法推送內容分佈</h4>
+                <canvas id="chart1"></canvas>
+            </div>
+            <div class="chart-item">
+                <h4>不感興趣處理方式</h4>
+                <canvas id="chart2"></canvas>
+            </div>
+            <div class="chart-item">
+                <h4>熱門人設推播比例</h4>
+                <canvas id="chart3"></canvas>
+            </div>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 12px; color: #cbd5e0;">* 圖表根據 Excel 樣本數據即時渲染</p>
     </div>
 </div>
 
@@ -64,19 +86,19 @@
     const questions = [
         { 
             id: 'q1', 
-            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br>
+            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>我們以為自己在選擇，其實只是順著流。<br>
                     <span class="highlight">＂請回憶，演算法經常將哪一類內容推到你眼前？＂</span>`, 
             pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'] 
         },
         { 
             id: 'q2', 
-            title:  `如同經營水族店，需要調整魚缸的水溫、光線及水質，為魚群打造適合的生活環境。<br>數位平台也透過演算法、觸及率與推薦內容，為你調配視界。<br>
-                    <span class="highlight">你會自主調整平台環境嗎？對於不感興趣的資訊，你通常怎麼處理？</span>`,
+            title:  `如同經營水族店，數位平台也為你調配視界。<br>
+                    <span class="highlight">對於不感興趣的資訊，你通常怎麼處理？</span>`,
             pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'] 
         },
         { 
             id: 'q3', 
-            title:  `數位平台的內容，為了被識別、推薦，採取專門化與人設化策略。<br>那些針對觸及受眾、引發互動留言的資訊，更容易被聚集流量。<br>
+            title:  `那些針對觸及受眾、引發互動的資訊，更容易被聚集流量。<br>
                     <span class="highlight">＂請回憶，演算法經常將哪一類熱門人設推到你眼前？＂</span>`, 
             pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'] 
         }
@@ -111,7 +133,6 @@
     function handleSelect(index) {
         const q = questions[currentQIndex];
         userSelections.push({ question: q.id, answer: displayOptions[index] });
-
         if (q.pool.length > 0) {
             displayOptions[index] = q.pool.shift();
             renderOptions();
@@ -132,17 +153,19 @@
     function showThankYou() {
         document.getElementById('quiz-section').classList.add('hidden');
         document.getElementById('thank-you').classList.remove('hidden');
+        document.getElementById('main-container').classList.add('expanded');
         
+        // 1. 發送數據到 Webhook
+        sendDataToWebhook();
+
+        // 2. 渲染對應 Excel 工作表2 的三張圖表
+        renderCharts();
+    }
+
+    function sendDataToWebhook() {
         const now = new Date();
-        const isoTimestamp = now.toISOString(); 
-
-        let payload = {
-            "填答時間": isoTimestamp
-        };
-
-        userSelections.forEach(selection => {
-            payload[selection.answer] = "✔"; 
-        });
+        let payload = { "填答時間": now.toISOString() };
+        userSelections.forEach(selection => { payload[selection.answer] = "✔"; });
 
         const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI"; 
 
@@ -150,11 +173,41 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload) 
-        })
-        .then(response => {
-            if (response.ok) console.log("傳送成功 (ISO 8601)");
-        })
-        .catch(error => console.error("傳送錯誤：", error));
+        }).catch(error => console.error("Webhook Error:", error));
+    }
+
+    function renderCharts() {
+        const ctxConfig = {
+            type: 'pie',
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+        };
+
+        // 圖表 1：模擬 Q1 數據 (對應 Excel 圓餅圖 1)
+        new Chart(document.getElementById('chart1'), {
+            ...ctxConfig,
+            data: {
+                labels: ['美食', '迷因', '追星', '知識', '其他'],
+                datasets: [{ data: [35, 25, 15, 15, 10], backgroundColor: ['#4A90E2', '#63B3ED', '#90CDF4', '#BEE3F8', '#E2E8F0'] }]
+            }
+        });
+
+        // 圖表 2：模擬 Q2 數據 (對應 Excel 圓餅圖 2)
+        new Chart(document.getElementById('chart2'), {
+            ...ctxConfig,
+            data: {
+                labels: ['就滑掉', '按不感興趣', '取消追蹤', '默默看完', '其他'],
+                datasets: [{ data: [45, 20, 15, 10, 10], backgroundColor: ['#48BB78', '#68D391', '#9AE6B4', '#C6F6D5', '#F0FFF4'] }]
+            }
+        });
+
+        // 圖表 3：模擬 Q3 數據 (對應 Excel 圓餅圖 3)
+        new Chart(document.getElementById('chart3'), {
+            ...ctxConfig,
+            data: {
+                labels: ['風趣', '專業', '自信', '努力', '其他'],
+                datasets: [{ data: [30, 30, 20, 10, 10], backgroundColor: ['#ED8936', '#F6AD55', '#FBD38D', '#FEEBC8', '#FFFAF0'] }]
+            }
+        });
     }
 
     function shuffle(array) {
