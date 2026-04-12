@@ -7,15 +7,42 @@
     <style>
         :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 550px; text-align: center; }
+        
+        /* 響應式容器調整 */
+        .container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 550px; 
+            text-align: center; 
+            box-sizing: border-box; /* 確保 padding 不會撐破寬度 */
+        }
+
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
-        #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 20px; font-weight: 500; }
-        .highlight { display: block; margin-top: 15px; font-size: 24px; font-weight: 800; color: var(--text-dark); text-shadow: 0px 2px 4px rgba(74, 144, 226, 0.1); }
+        
+        /* 調整標題在手機上的行高與間距 */
+        #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: justify; }
+        
+        /* 調整重點文字在手機上的大小 */
+        .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-shadow: 0px 2px 4px rgba(74, 144, 226, 0.1); }
+        
         #options-container { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
-        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 17px; background: #fff; color: #4a5568; }
+        
+        /* 選項盒子的觸控優化 */
+        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 17px; background: #fff; color: #4a5568; -webkit-tap-highlight-color: transparent; }
         .option-box:hover { border-color: var(--primary); background: #ebf4ff; color: var(--primary); transform: translateY(-2px); }
         .option-box:active { transform: scale(0.97); }
         .hidden { display: none; }
+
+        /* 手機版專屬微調 (螢幕寬度小於 480px) */
+        @media (max-width: 480px) {
+            .container { padding: 25px 20px; }
+            #question-title { font-size: 16px; }
+            .highlight { font-size: 18px; }
+            .option-box { padding: 15px; font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -106,7 +133,6 @@
         document.getElementById('quiz-section').classList.add('hidden');
         document.getElementById('thank-you').classList.remove('hidden');
         
-        // --- 核心改動：使用 ISO 8601 格式 ---
         const now = new Date();
         const isoTimestamp = now.toISOString(); 
 
@@ -118,7 +144,6 @@
             payload[selection.answer] = "✔"; 
         });
 
-        // 請替換為你從 Power Automate 取得的網址
         const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI"; 
 
         fetch(webhookUrl, {
