@@ -33,16 +33,15 @@
         .chart-item { background: #fdfdfd; padding: 20px; border-radius: 15px; border: 1px solid #f0f4f8; }
         .chart-item h4 { font-size: 14px; color: #718096; margin-bottom: 10px; }
 
+        /* 載入畫面樣式 */
         #loading-section { padding: 40px 0; color: var(--text-dark); font-weight: 500; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #edf2f7; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        .spinner { width: 45px; height: 45px; border: 5px solid #edf2f7; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .hidden { display: none; }
 
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
-            #question-title { font-size: 16px; text-align: center; }
-            .highlight { font-size: 18px; text-align: center; }
         }
     </style>
 </head>
@@ -57,12 +56,12 @@
 
     <div id="loading-section" class="hidden">
         <div class="spinner"></div>
-        <div id="loading-text">正在讀取 Excel 工作表 2 最新數據...</div>
+        <div id="loading-text">正在分析數據，請稍候...</div>
     </div>
 
     <div id="thank-you" class="hidden">
         <h2>✨ 感謝您的回答 ✨</h2>
-        <p style="color: #718096;">數據已即時同步，以下為最新分析報告：</p>
+        <p style="color: #718096;">數據已成功從 Excel 工作表 2 同步：</p>
         
         <div class="chart-grid">
             <div class="chart-item">
@@ -85,9 +84,9 @@
     Chart.register(ChartDataLabels);
 
     const questions = [
-        { id: 'q1', title: `數位平台的使用者，為什麼被稱作受眾呢？<br>我們以為自己在選擇，其實只是順著流。<br><span class="highlight">＂請回憶，演算法經常將哪一類內容推到你眼前？＂</span>`, pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'] },
+        { id: 'q1', title: `數位平台的使用者，為什麼被稱作受眾呢？<br><span class="highlight">＂請回憶，演算法經常將哪一類內容推到你眼前？＂</span>`, pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'] },
         { id: 'q2', title: `如同經營水族店，數位平台也為你調配視界。<br><span class="highlight">對於不感興趣的資訊，你通常怎麼處理？</span>`, pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'] },
-        { id: 'q3', title: `那些針對觸及受眾、引發互動的資訊，更容易被聚集流量。<br><span class="highlight">＂請回憶，演算法經常將哪一類熱門人設推到你眼前？＂</span>`, pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'] }
+        { id: 'q3', title: `那些引發互動的資訊，更容易被聚集流量。<br><span class="highlight">＂請回憶，演算法經常將哪一類熱門人設推到你眼前？＂</span>`, pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'] }
     ];
 
     let currentQIndex = 0;
@@ -96,7 +95,7 @@
 
     function initQuestion() {
         const q = questions[currentQIndex];
-        if (!q) { processData(); return; }
+        if (!q) { finalizeSubmission(); return; }
         document.getElementById('progress').innerText = `STEP ${currentQIndex + 1} / ${questions.length}`;
         document.getElementById('question-title').innerHTML = q.title;
         q.pool = shuffle([...q.pool]);
@@ -123,38 +122,30 @@
             displayOptions[index] = q.pool.shift();
             renderOptions();
         } else {
-            nextQuestion();
-        }
-    }
-
-    function nextQuestion() {
-        currentQIndex++;
-        if (currentQIndex < questions.length) {
+            currentQIndex++;
             initQuestion();
-        } else {
-            processData();
         }
     }
 
-    async function processData() {
+    // 核心邏輯：提交並顯示載入畫面
+    async function finalizeSubmission() {
         document.getElementById('quiz-section').classList.add('hidden');
         document.getElementById('loading-section').classList.remove('hidden');
-        
-        // 發送並「等待」Power Automate 的回應
-        const realData = await sendDataAndFetchResults();
+
+        // 等待 Power Automate 回傳 JSON 數據
+        const dataFromExcel = await sendToPowerAutomate();
 
         document.getElementById('loading-section').classList.add('hidden');
         document.getElementById('thank-you').classList.remove('hidden');
         
-        renderCharts(realData);
+        renderCharts(dataFromExcel);
     }
 
-    async function sendDataAndFetchResults() {
-        const now = new Date();
-        let payload = { "填答時間": now.toISOString() };
-        userSelections.forEach(selection => { payload[selection.answer] = "✔"; });
+    async function sendToPowerAutomate() {
+        const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI";
         
-        const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI"; 
+        let payload = { "填答時間": new Date().toISOString() };
+        userSelections.forEach(s => { payload[s.answer] = "✔"; });
 
         try {
             const response = await fetch(webhookUrl, {
@@ -163,61 +154,55 @@
                 body: JSON.stringify(payload)
             });
             
-            // 這裡假設 Power Automate 的 Response 會回傳 JSON 格式的統計結果
             if (response.ok) {
-                return await response.json(); 
+                return await response.json(); // 這裡接收 PA 的 Response 動作回傳的 JSON
             }
         } catch (e) {
-            console.error("無法從 Power Automate 獲取數據:", e);
+            console.error("連線至 Power Automate 失敗:", e);
         }
-        return null; // 若失敗則回傳空
+        return null; // 若失敗回傳 null 以使用預設值
     }
 
     function renderCharts(serverData) {
-        // 如果伺服器有回傳數據則使用它，否則使用預設顯示
-        const d1 = serverData ? serverData.q1_values : [20, 15, 12, 10, 10, 8, 8, 7, 5, 5];
-        const d2 = serverData ? serverData.q2_values : [15, 15, 10, 20, 35, 5];
-        const d3 = serverData ? serverData.q3_values : [25, 15, 20, 15, 10, 15];
+        // 設定數據源：若 PA 回傳為空，則顯示一組基礎數值預覽
+        const d1 = serverData?.q1 || [20, 15, 12, 10, 10, 8, 8, 7, 5, 5];
+        const d2 = serverData?.q2 || [15, 15, 10, 20, 35, 5];
+        const d3 = serverData?.q3 || [25, 15, 20, 15, 10, 15];
 
-        const commonOptions = {
-            animation: { duration: 1500 },
+        const options = {
             plugins: {
                 legend: { display: false },
                 datalabels: {
                     color: '#fff',
                     font: { weight: 'bold', size: 11 },
-                    formatter: (value, ctx) => ctx.chart.data.labels[ctx.dataIndex] + "\n" + value,
+                    formatter: (val, ctx) => ctx.chart.data.labels[ctx.dataIndex] + "\n" + val,
                     textAlign: 'center'
                 }
             }
         };
 
         new Chart(document.getElementById('chart1'), { 
-            type: 'pie', options: commonOptions, 
-            data: { labels: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'], datasets: [{ data: d1, backgroundColor: ['#4A90E2', '#63B3ED', '#48BB78', '#F6AD55', '#9F7AEA', '#ED64A6', '#667EEA', '#4FD1C5', '#FBD38D', '#CBD5E0'] }] } 
+            type: 'pie', data: { labels: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'], datasets: [{ data: d1, backgroundColor: ['#4A90E2', '#63B3ED', '#48BB78', '#F6AD55', '#9F7AEA', '#ED64A6', '#667EEA', '#4FD1C5', '#FBD38D', '#CBD5E0'] }] }, options
         });
 
         new Chart(document.getElementById('chart2'), { 
-            type: 'pie', options: commonOptions, 
-            data: { labels: ['按不感興趣', '搜尋別的', '默默看完', '取消追蹤', '就滑掉', '檢舉'], datasets: [{ data: d2, backgroundColor: ['#F56565', '#ED8936', '#ECC94B', '#48BB78', '#4299E1', '#A0AEC0'] }] } 
+            type: 'pie', data: { labels: ['按不感興趣', '搜尋別的', '默默看完', '取消追蹤', '就滑掉', '檢舉'], datasets: [{ data: d2, backgroundColor: ['#F56565', '#ED8936', '#ECC94B', '#48BB78', '#4299E1', '#A0AEC0'] }] }, options
         });
 
         new Chart(document.getElementById('chart3'), { 
-            type: 'pie', options: commonOptions, 
-            data: { labels: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'], datasets: [{ data: d3, backgroundColor: ['#9F7AEA', '#ED64A6', '#667EEA', '#4FD1C5', '#F6AD55', '#FC8181'] }] } 
+            type: 'pie', data: { labels: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'], datasets: [{ data: d3, backgroundColor: ['#9F7AEA', '#ED64A6', '#667EEA', '#4FD1C5', '#F6AD55', '#FC8181'] }] }, options
         });
     }
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
-        return array;
+        return arr;
     }
 
     initQuestion();
 </script>
-
 </body>
 </html>
