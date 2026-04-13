@@ -6,13 +6,26 @@
     <title>魚缸測試</title>
     <style>
         :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; --card-bg: #ffffff; }
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        
+        /* 修改背景為指定的漸層色 */
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            background: linear-gradient(135deg, #7bc4cc, #2a6a7a, #0a2a35, #051820);
+            background-attachment: fixed; /* 確保漸層填滿整個視窗不隨捲動斷開 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
         
         .container { 
             background: var(--card-bg); 
             padding: 40px; 
             border-radius: 24px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); /* 稍微加深陰影讓白盒在深色背景更明顯 */
             width: 100%; 
             max-width: 600px; 
             text-align: center; 
