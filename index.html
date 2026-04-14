@@ -32,32 +32,51 @@
             box-sizing: border-box;
         }
          
-                /* 讓圖表區塊可以垂直排列並置中 */
-        .chart-section {
-            width: 100%;
-            margin-top: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-        }
-        
-        /* 核心設定：讓圖表自動適應容器 */
+                /* 1. 外層容器：定義顯示的大小 */
         .chart-wrapper {
-            width: 100%;           /* 寬度撐滿父容器 (也就是 600px 的內部) */
-            max-width: 500px;      /* 限制一個最大寬度，確保在電腦看不會太大 */
-            aspect-ratio: 1 / 1;   /* 強制設定為正方形，這是圓餅圖最不會被切掉的比例 */
+            width: 100%;             /* 寬度撐滿 600px 的 container */
+            max-width: 550px; 
+            aspect-ratio: 16 / 10;   /* 根據 Google 圖表預設比例設定 */
+            overflow: hidden;        /* 關鍵：隱藏捲軸 */
+            position: relative;
             border: 1px solid #edf2f7;
-            border-radius: 16px;
-            overflow: hidden;
+            border-radius: 12px;
             background: #fff;
+            margin-bottom: 20px;
         }
         
+        /* 2. 內部 iframe：強制縮放內容以適應窗口 */
         .chart-wrapper iframe {
-            width: 100% !important;
-            height: 100% !important;
+            /* 這裡設定 Google 圖表的原始寬高 (預設約 1000x600) */
+            width: 1000px !important; 
+            height: 625px !important;
+            
+            position: absolute;
+            top: 0;
+            left: 0;
+            
+            /* 設定縮放原點在左上角 */
+            transform-origin: 0 0; 
+            
+            /* 計算縮放比例：讓 1000px 縮小到容器的 100% 寬度 */
+            transform: scale(calc(600 / 1000)); /* 如果父容器是 600px */
+            
+            /* 讓它自動計算適合的縮放倍率，適應不同螢幕 */
+            width: 1000px;
+            height: 625px;
+            transform: scale(var(--rescale, 0.55)); 
             border: none;
-            display: block;
+        }
+        
+        /* 針對電腦版 container 為 600px 時的縮放倍率 */
+        .chart-wrapper { --rescale: 0.58; }
+        
+        /* 針對手機版 (假設寬度變為約 350px) 時的縮放倍率 */
+        @media (max-width: 480px) {
+            .chart-wrapper { 
+                --rescale: 0.32; /* 數值越小，圖片縮得越小 */
+                aspect-ratio: 16 / 12; 
+            }
         }
             
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
