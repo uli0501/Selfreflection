@@ -32,20 +32,22 @@
             box-sizing: border-box;
         }
          
-               /* 1. 控制外層容器的縮放與比例 */
+                       /* 1. 縮小容器本身，不再讓它撐滿 600px */
         .chart-wrapper {
-            width: 85%;              /* 讓圖表縮小到容器寬度的 85%，不再撐滿 */
-            max-width: 400px;        /* 強制限制最大寬度，避免電腦版看起來太大 */
+            /* 你可以調整這個百分比或像素，直接決定圖表在畫面上看起來的大小 */
+            width: 75%;              /* 讓它只佔白盒子的 75% 寬度 */
+            max-width: 380px;        /* 設定一個上限，避免在電腦螢幕上看太大 */
+            
             position: relative;
-            padding-bottom: 85%;     /* 比例設為接近 1:1 (正方形)，圓餅圖最不會被切掉 */
+            padding-bottom: 75%;     /* 保持 1:1 正方形比例，這對圓餅圖最友善 */
             height: 0;
             overflow: hidden;
             border-radius: 12px;
             border: 1px solid #edf2f7;
-            margin: 0 auto 10px auto; /* 透過 auto 達成水平置中 */
+            margin: 0 auto;          /* 透過 auto 達成水平置中 */
         }
         
-        /* 2. 讓內容自動填滿這個縮小後的容器 */
+        /* 2. 讓 iframe 乖乖待在縮小後的容器裡 */
         .chart-wrapper iframe {
             position: absolute;
             top: 0;
@@ -55,13 +57,13 @@
             border: none;
         }
         
-        /* 3. 調整圖表與圖表之間的間距 */
+        /* 3. 調整圖表間距 */
         .chart-section {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px; 
+            gap: 25px;               /* 圖表與圖表之間的距離 */
             width: 100%;
         }
             
