@@ -36,13 +36,14 @@
         .chart-wrapper {
             width: 100%;             /* 寬度撐滿 600px 的 container */
             max-width: 550px; 
-            aspect-ratio: 16 / 10;   /* 根據 Google 圖表預設比例設定 */
+            aspect-ratio: 16 / 12;   /* 根據 Google 圖表預設比例設定 */
             overflow: hidden;        /* 關鍵：隱藏捲軸 */
             position: relative;
             border: 1px solid #edf2f7;
             border-radius: 12px;
             background: #fff;
             margin-bottom: 20px;
+            --rescale: 0.58;
         }
         
         /* 2. 內部 iframe：強制縮放內容以適應窗口 */
