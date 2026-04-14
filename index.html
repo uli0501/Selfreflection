@@ -32,18 +32,20 @@
             box-sizing: border-box;
         }
          
-        /* 圖表容器：控制寬度並保持比例 */
+               /* 1. 控制外層容器的縮放與比例 */
         .chart-wrapper {
-            width: 100%;             /* 填滿父容器 600px */
+            width: 85%;              /* 讓圖表縮小到容器寬度的 85%，不再撐滿 */
+            max-width: 400px;        /* 強制限制最大寬度，避免電腦版看起來太大 */
             position: relative;
-            padding-bottom: 65%;     /* 控制圖表高度比例 (約 16:10) */
+            padding-bottom: 85%;     /* 比例設為接近 1:1 (正方形)，圓餅圖最不會被切掉 */
             height: 0;
             overflow: hidden;
-            border-radius: 12px;     /* 讓圖表邊角跟選項框一樣圓潤 */
+            border-radius: 12px;
             border: 1px solid #edf2f7;
+            margin: 0 auto 10px auto; /* 透過 auto 達成水平置中 */
         }
         
-        /* 讓內部 iframe 撐滿容器 */
+        /* 2. 讓內容自動填滿這個縮小後的容器 */
         .chart-wrapper iframe {
             position: absolute;
             top: 0;
@@ -51,6 +53,16 @@
             width: 100% !important;
             height: 100% !important;
             border: none;
+        }
+        
+        /* 3. 調整圖表與圖表之間的間距 */
+        .chart-section {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px; 
+            width: 100%;
         }
             
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
