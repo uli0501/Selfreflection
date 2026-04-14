@@ -31,28 +31,23 @@
             text-align: center; 
             box-sizing: border-box;
         }
-
-                /* 圖表容器：控制寬度並保持比例 */
-        .chart-wrapper {
-            width: 100%;             /* 填滿父容器 600px */
-            position: relative;
-            padding-bottom: 65%;     /* 控制圖表高度比例 (約 16:10) */
-            height: 0;
-            overflow: hidden;
-            border-radius: 12px;     /* 讓圖表邊角跟選項框一樣圓潤 */
-            border: 1px solid #edf2f7;
+                /* 設定圓餅圖的響應式縮放 */
+        .responsive-chart {
+            width: 100%;             /* 在手機上自動撐滿白框 */
+            max-width: 480px;        /* 桌面端最大只顯示 480px，看起來比較精緻 */
+            height: auto;            /* 這是關鍵：讓瀏覽器根據比例自動計算高度 */
+            aspect-ratio: 16 / 10;   /* 鎖定圓餅圖的比例，防止縮小時壓扁 */
+            border: 1px solid #edf2f7; /* 加入淡淡的邊框，跟選項框風格統一 */
+            border-radius: 12px;     /* 讓邊角變圓潤，比較好看 */
         }
         
-        /* 讓內部 iframe 撐滿容器 */
-        .chart-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
+        /* 針對小螢幕（手機）的微調 */
+        @media (max-width: 480px) {
+            .responsive-chart {
+                max-width: 100%;     /* 手機上完全適應視窗 */
+            }
         }
-
+        
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
         #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: center; }
         .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-align: center; }
@@ -92,22 +87,17 @@
     <div id="thank-you" class="hidden">
         <div style="font-size: 60px; margin-bottom: 20px;"></div>
         <h2>✨感謝您的參與✨</h2> <br>您的填答已成功寫入資料庫。<br>看看其他魚兒留下的紀錄吧！</p>
-            <div class="chart-section" style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <div class="chart-section" style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
         
-        <div class="chart-wrapper">
-            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe>
-        </div>
+        <iframe class="responsive-chart" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe>
                 
-        <div class="chart-wrapper">
-            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe>
-        </div>
+        <iframe class="responsive-chart" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe>
         
-        <div class="chart-wrapper">
-            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe>
+        <iframe class="responsive-chart" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe>
+
+            </div>
         </div>
     </div>
-    </div>
-</div>
 
 <script>
     const questions = [
