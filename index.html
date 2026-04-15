@@ -7,11 +7,10 @@
     <style>
         :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; --card-bg: #ffffff; }
         
-        /* 修改背景為指定的漸層色 */
         body { 
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
             background: linear-gradient(135deg, #7bc4cc, #2a6a7a, #0a2a35, #051820);
-            background-attachment: fixed; /* 確保漸層填滿整個視窗不隨捲動斷開 */
+            background-attachment: fixed;
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -25,79 +24,84 @@
             background: var(--card-bg); 
             padding: 40px; 
             border-radius: 24px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); /* 稍微加深陰影讓白盒在深色背景更明顯 */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             width: 100%; 
             max-width: 600px; 
             text-align: center; 
             box-sizing: border-box;
         }
-         
-                /* 1. 外層容器：定義顯示的大小 */
+
+        /* 圖表框架樣式 */
         .chart-wrapper {
-            width: 100%;             /* 寬度撐滿 600px 的 container */
-            max-width: 550px; 
-            aspect-ratio: 16 / 12;   /* 根據 Google 圖表預設比例設定 */
-            overflow: hidden;        /* 關鍵：隱藏捲軸 */
-            position: relative;
-            border: 1px solid #edf2f7;
-            border-radius: 12px;
-            background: #fff;
-            margin-bottom: 20px;
+            width: 100%; max-width: 550px; aspect-ratio: 16 / 12; overflow: hidden; position: relative;
+            border: 1px solid #edf2f7; border-radius: 12px; background: #fff; margin-bottom: 20px;
         }
-        
-        /* 2. 內部 iframe：強制縮放內容以適應窗口 */
         .chart-wrapper iframe {
-            /* 這裡設定 Google 圖表的原始寬高 (預設約 1000x600) */
-            width: 1000px !important; 
-            height: 625px !important;
-            
-            position: absolute;
-            top: 0;
-            left: 0;
-            
-            /* 設定縮放原點在左上角 */
-            transform-origin: 0 0; 
-            
-            /* 計算縮放比例：讓 1000px 縮小到容器的 100% 寬度 */
-            transform: scale(calc(600 / 1000)); /* 如果父容器是 600px */
-            
-            /* 讓它自動計算適合的縮放倍率，適應不同螢幕 */
-            width: 1000px;
-            height: 625px;
-            transform: scale(var(--rescale, 0.55)); 
-            border: none;
+            width: 1000px !important; height: 625px !important; position: absolute; top: 0; left: 0;
+            transform-origin: 0 0; transform: scale(var(--rescale, 0.55)); border: none;
         }
-        
-        /* 針對電腦版 container 為 600px 時的縮放倍率 */
         .chart-wrapper { --rescale: 0.58; }
-        
-        /* 針對手機版 (假設寬度變為約 350px) 時的縮放倍率 */
-        @media (max-width: 480px) {
-            .chart-wrapper { 
-                --rescale: 0.32; /* 數值越小，圖片縮得越小 */
-                aspect-ratio: 16 / 12; 
-            }
-        }
+        @media (max-width: 480px) { .chart-wrapper { --rescale: 0.32; } }
             
         #progress { color: #a0aec0; font-size: 13px; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
         #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: center; }
         .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-align: center; }
         
-        #options-container { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
-        .option-box { padding: 18px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 17px; background: #fff; color: #4a5568; -webkit-tap-highlight-color: transparent; }
-        .option-box:hover { border-color: var(--primary); background: #ebf4ff; color: var(--primary); transform: translateY(-2px); }
+        /* 選項網格系統 */
+        #options-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-top: 25px; 
+        }
         
-        /* 載入中畫面樣式 */
-        #loading-section { padding: 40px 0; color: var(--text-dark); font-weight: 500; }
+        .option-box { 
+            padding: 15px; 
+            border: 2px solid #edf2f7; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 16px; 
+            background: #fff; 
+            color: #4a5568; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        .option-box.selected {
+            border-color: var(--primary);
+            background: #ebf4ff;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* 下一步按鈕樣式 */
+        #next-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #cbd5e0; 
+            border: none;
+            border-radius: 50px;
+            cursor: not-allowed;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        #next-btn.active {
+            background-color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .hidden { display: none; }
         .spinner { width: 45px; height: 45px; border: 5px solid #edf2f7; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .hidden { display: none; }
-
         @media (max-width: 480px) {
             .container { padding: 25px 20px; }
-            #question-title { font-size: 16px; }
-            .highlight { font-size: 18px; }
+            #options-container { grid-template-columns: 1fr; } 
         }
     </style>
 </head>
@@ -108,6 +112,7 @@
         <div id="progress">STEP 1 / 3</div>
         <div id="question-title">載入中...</div>
         <div id="options-container"></div>
+        <button id="next-btn" onclick="goToNextQuestion()">請選擇</button>
     </div>
 
     <div id="loading-section" class="hidden">
@@ -116,84 +121,125 @@
     </div>
 
     <div id="thank-you" class="hidden">
-        <div style="font-size: 60px; margin-bottom: 20px;"></div>
-        <h2>✨感謝您的參與✨</h2> <br>您的填答已成功寫入資料庫。<br>看看其他魚兒留下的紀錄吧！</p>
-           <div class="chart-section" style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
-        
-                <div class="chart-wrapper">
-                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe>
-                </div>
-                
-                <div class="chart-wrapper">
-                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe>
-                </div>
-                
-                <div class="chart-wrapper">
-                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe>
-                </div>
-
+        <h2>✨感謝您的參與✨</h2> 
+        <p>您的填答已成功寫入資料庫。<br>看看其他魚兒留下的紀錄吧！</p>
+        <div class="chart-section" style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
+            <div class="chart-wrapper">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe>
+            </div>
+            <div class="chart-wrapper">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe>
+            </div>
+            <div class="chart-wrapper">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe>
             </div>
         </div>
     </div>
+</div>
 
 <script>
     const questions = [
         { 
             id: 'q1', 
-            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br>
-                    <span class="highlight">請回憶，演算法經常將哪一類內容推到你眼前？</span>`, 
-            pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'] 
+            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br
+                    <span class="highlight">請回憶，演算法經常將哪一類內容推到你眼前</span>`, 
+            pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'],
+            multiSelect: 3 
         },
         { 
             id: 'q2', 
             title:  `如同經營水族店，需要調整魚缸的水溫、光線及水質，為魚群打造適合的生活環境。<br>數位平台也透過演算法、觸及率與推薦內容，為你調配視界。<br>
                     <span class="highlight">你會自主調整平台環境嗎？對於不感興趣的資訊，你通常怎麼處理？</span>`,
-            pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'] 
+            pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'],
+            multiSelect: 1
         },
         { 
             id: 'q3', 
             title:  `數位平台的內容，為了被識別、推薦，採取專門化與人設化策略。<br>那些針對觸及受眾、引發互動留言的資訊，更容易被聚集流量。<br>
                     <span class="highlight">請回憶，演算法經常將哪一類熱門人設推到你眼前？</span>`, 
-            pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'] 
+            pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'],
+            multiSelect: 2
         }
     ];
 
     let currentQIndex = 0;
-    let displayOptions = []; 
-    let userSelections = []; 
+    let tempSelections = []; 
+    let finalAnswers = [];   
 
     function initQuestion() {
         const q = questions[currentQIndex];
         if (!q) { submitData(); return; }
+        
+        tempSelections = []; 
+        updateButtonState(); 
+
         document.getElementById('progress').innerText = `STEP ${currentQIndex + 1} / ${questions.length}`;
         document.getElementById('question-title').innerHTML = q.title;
-        q.pool = shuffle([...q.pool]);
-        displayOptions = q.pool.splice(0, 4);
-        renderOptions();
+        
+        renderOptions(q.pool);
     }
 
-    function renderOptions() {
+    function renderOptions(options) {
         const container = document.getElementById('options-container');
         container.innerHTML = '';
-        displayOptions.forEach((opt, index) => {
+        
+        options.forEach((opt) => {
             const div = document.createElement('div');
             div.className = 'option-box';
             div.innerText = opt;
-            div.onclick = () => handleSelect(index);
+            div.onclick = () => toggleSelect(div, opt);
             container.appendChild(div);
         });
     }
 
-    function handleSelect(index) {
+    function toggleSelect(element, value) {
         const q = questions[currentQIndex];
-        userSelections.push({ question: q.id, answer: displayOptions[index] });
-        if (q.pool.length > 0) {
-            displayOptions[index] = q.pool.shift();
-            renderOptions();
+        const max = q.multiSelect;
+
+        if (tempSelections.includes(value)) {
+            tempSelections = tempSelections.filter(item => item !== value);
+            element.classList.remove('selected');
         } else {
-            currentQIndex++;
-            initQuestion();
+            if (max === 1) {
+                // 單選邏輯：先清除所有選中狀態
+                const allBoxes = document.querySelectorAll('.option-box');
+                allBoxes.forEach(box => box.classList.remove('selected'));
+                tempSelections = [value];
+                element.classList.add('selected');
+            } else if (tempSelections.length < max) {
+                // 多選邏輯：增加至上限為止
+                tempSelections.push(value);
+                element.classList.add('selected');
+            }
         }
+        updateButtonState();
+    }
+
+    function updateButtonState() {
+        const btn = document.getElementById('next-btn');
+        const q = questions[currentQIndex];
+        const count = tempSelections.length;
+        const max = q.multiSelect;
+
+        if (count === max) {
+            btn.innerText = "下一步";
+            btn.classList.add('active');
+            btn.disabled = false;
+        } else {
+            btn.innerText = `還需選擇 ${max - count} 個`;
+            btn.classList.remove('active');
+            btn.disabled = true;
+        }
+    }
+
+    function goToNextQuestion() {
+        const q = questions[currentQIndex];
+        tempSelections.forEach(ans => {
+            finalAnswers.push({ question: q.id, answer: ans });
+        });
+
+        currentQIndex++;
+        initQuestion();
     }
 
     async function submitData() {
@@ -203,7 +249,7 @@
         const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI";
         
         let payload = { "填答時間": new Date().toISOString() };
-        userSelections.forEach(s => { payload[s.answer] = "✔"; });
+        finalAnswers.forEach(s => { payload[s.answer] = "✔"; });
 
         try {
             await fetch(webhookUrl, {
@@ -215,17 +261,8 @@
             console.error("傳送失敗:", e);
         }
 
-        // 結束後顯示感謝畫面
         document.getElementById('loading-section').classList.add('hidden');
         document.getElementById('thank-you').classList.remove('hidden');
-    }
-
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
     }
 
     initQuestion();
