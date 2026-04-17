@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>～魚缸的倒影～</title>
+    <title>~魚缸的倒影~</title>
     <style>
         :root { --primary: #4A90E2; --bg: #f8f9fa; --text-dark: #2d3748; --card-bg: #ffffff; }
         
@@ -11,27 +11,19 @@
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
             background: linear-gradient(135deg, #7bc4cc, #2a6a7a, #0a2a35, #051820);
             background-attachment: fixed;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px; 
-            box-sizing: border-box; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; 
         }
         
         .container { 
-            background: var(--card-bg); 
-            padding: 40px; 
-            border-radius: 24px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            width: 100%; 
-            max-width: 600px; 
-            text-align: center; 
-            box-sizing: border-box;
+            background: var(--card-bg); padding: 40px; border-radius: 24px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 100%; max-width: 600px; 
+            text-align: center; box-sizing: border-box;
         }
 
-        /* 圖表框架樣式 */
+        /* 內容區塊動畫切換 */
+        .step-content { transition: opacity 0.3s ease; }
+
         .chart-wrapper {
             width: 100%; max-width: 550px; aspect-ratio: 16 / 12; overflow: hidden; position: relative;
             border: 1px solid #edf2f7; border-radius: 12px; background: #fff; margin-bottom: 20px;
@@ -47,62 +39,26 @@
         #question-title { margin: 0; color: var(--text-dark); line-height: 1.6; font-size: 18px; font-weight: 500; text-align: center; }
         .highlight { display: block; margin-top: 15px; font-size: 20px; font-weight: 800; color: var(--text-dark); text-align: center; }
         
-        /* 選項網格系統 */
-        #options-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-top: 25px; 
-        }
+        #options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
         
         .option-box { 
-            padding: 15px; 
-            border: 2px solid #edf2f7; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            font-size: 16px; 
-            background: #fff; 
-            color: #4a5568; 
+            padding: 15px; border: 2px solid #edf2f7; border-radius: 12px; cursor: pointer; 
+            transition: all 0.2s; font-size: 16px; background: #fff; color: #4a5568; 
             -webkit-tap-highlight-color: transparent; 
         }
-        
-        .option-box.selected {
-            border-color: var(--primary);
-            background: #ebf4ff;
-            color: var(--primary);
-            font-weight: bold;
-        }
+        .option-box.selected { border-color: var(--primary); background: #ebf4ff; color: var(--primary); font-weight: bold; }
 
-        /* 下一步按鈕樣式 */
-        #next-btn {
-            margin-top: 30px;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            background-color: #cbd5e0; 
-            border: none;
-            border-radius: 50px;
-            cursor: not-allowed;
-            transition: all 0.3s;
-            width: 100%;
-        }
-
-        #next-btn.active {
-            background-color: var(--primary);
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
-        }
+        .btn-group { display: flex; gap: 10px; margin-top: 30px; }
+        #next-btn, #prev-btn { padding: 15px 20px; font-size: 18px; font-weight: bold; border: none; border-radius: 50px; transition: all 0.3s; cursor: pointer; width: 100%; }
+        #next-btn { color: white; background-color: #cbd5e0; cursor: not-allowed; flex: 2; }
+        #next-btn.active { background-color: var(--primary); cursor: pointer; box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4); }
+        #prev-btn { background-color: #edf2f7; color: #718096; flex: 1; }
 
         .hidden { display: none; }
         .spinner { width: 45px; height: 45px; border: 5px solid #edf2f7; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 480px) {
-            .container { padding: 25px 20px; }
-            #options-container { grid-template-columns: 1fr; } 
-        }
+        @media (max-width: 480px) { .container { padding: 25px 20px; } #options-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -112,7 +68,10 @@
         <div id="progress">STEP 1 / 3</div>
         <div id="question-title">載入中...</div>
         <div id="options-container"></div>
-        <button id="next-btn" onclick="goToNextQuestion()">請選擇</button>
+        <div class="btn-group">
+            <button id="prev-btn" class="hidden" onclick="goBack()">上一題</button>
+            <button id="next-btn" onclick="goToNextStep()">請選擇</button>
+        </div>
     </div>
 
     <div id="loading-section" class="hidden">
@@ -124,122 +83,119 @@
         <h2>✨感謝您的參與✨</h2> 
         <p>您的填答已成功寫入資料庫。<br>看看其他魚兒留下的紀錄吧！</p>
         <div class="chart-section" style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
-            <div class="chart-wrapper">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe>
-            </div>
-            <div class="chart-wrapper">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe>
-            </div>
-            <div class="chart-wrapper">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe>
-            </div>
+            <div class="chart-wrapper"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=992584688&amp;format=interactive"></iframe></div>
+            <div class="chart-wrapper"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=1054188959&amp;format=interactive"></iframe></div>
+            <div class="chart-wrapper"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW8qmgdGotNqiZykw6Sds5rcFBuvnm5yUEMfnOm_-G-qdk_TxXDE8tumZA9c7e9xD1Sw1Fj4_KhSy9/pubchart?oid=601164440&amp;format=interactive"></iframe></div>
         </div>
     </div>
 </div>
 
 <script>
     const questions = [
-        { 
-            id: 'q1', 
-            title: `數位平台的使用者，為什麼被稱作受眾呢？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br>
-                    <span class="highlight">請回憶，演算法經常將哪一類內容推到你眼前？</span>`, 
-            pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他'],
-            multiSelect: 3 
-        },
-        { 
-            id: 'q2', 
-            title:  `如同經營水族店，需要調整魚缸的水溫、光線及水質，為魚群打造適合的生活環境。<br>數位平台也透過演算法、觸及率與推薦內容，為你調配視界。<br>
-                    <span class="highlight">你會自主調整平台環境嗎？對於不感興趣的資訊，你通常怎麼處理？</span>`,
-            pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉'],
-            multiSelect: 1
-        },
-        { 
-            id: 'q3', 
-            title:  `數位平台的內容，為了被識別、推薦，採取專門化與人設化策略。<br>那些針對觸及受眾、引發互動留言的資訊，更容易被聚集流量。<br>
-                    <span class="highlight">請回憶，演算法經常將哪一類熱門人設推到你眼前？</span>`, 
-            pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人'],
-            multiSelect: 2
-        }
+        { id: 'q1', multiSelect: 3, title: `數位平台的使用者，為什麼被稱作受眾呢？<br>因為它是一種被導流的使用行為。<br>我們以為自己在選擇，其實只是順著流。<br><span class="highlight">請回憶，演算法經常將哪一類內容推到你眼前？</span>`, pool: ['美食', '迷因', '運動', '旅遊', '追星', '動物', '攝影', '美妝', '知識', '其他']},
+        { id: 'q2', multiSelect: 1, title: `如同經營水族店，需要調整魚缸的水溫、光線及水質，為魚群打造適合的生活環境。<br>數位平台也透過演算法、觸及率與推薦內容，為你調配視界。<br><span class="highlight">你會自主調整平台環境嗎？對於不感興趣的資訊，你通常怎麼處理？</span>`, pool: ['按不感興趣', '搜尋別的內容', '默默看完', '取消追蹤', '就滑掉', '檢舉']},
+        { id: 'q3', multiSelect: 2, title: `數位平台的內容，為了被識別、推薦，採取專門化與人設化策略。<br>那些針對觸及受眾、引發互動留言的資訊，更容易被聚集流量。<br><span class="highlight">請回憶，演算法經常將哪一類熱門人設推到你眼前？</span>`, pool: ['風趣的人', 'EMO 的人', '自信的人', '友善的人', '努力的人', '專業的人']}
     ];
 
     let currentQIndex = 0;
-    let tempSelections = []; 
-    let finalAnswers = [];   
+    let finalAnswers = {}; // 改用物件格式儲存，方便追蹤每一題選了什麼
 
-    function initQuestion() {
+    // 初始化：監聽 Hash 變化
+    window.addEventListener('load', handleRouting);
+    window.addEventListener('hashchange', handleRouting);
+
+    function handleRouting() {
+        // 【新增】初始化時，先檢查有沒有之前的備份
+        const backup = localStorage.getItem('survey_backup');
+        if (backup && Object.keys(finalAnswers).length === 0) {
+            finalAnswers = JSON.parse(backup);
+        }
+    
+        const hash = window.location.hash;
+        let step = parseInt(hash.replace('#step', '')) || 1;
+        currentQIndex = step - 1;
+    
+        if (currentQIndex < 0) currentQIndex = 0;
+        renderQuestion();
+    }
+
+    function renderQuestion() {
         const q = questions[currentQIndex];
-        if (!q) { submitData(); return; }
         
-        tempSelections = []; 
-        updateButtonState(); 
-
+        // 更新進度與標題
         document.getElementById('progress').innerText = `STEP ${currentQIndex + 1} / ${questions.length}`;
         document.getElementById('question-title').innerHTML = q.title;
         
-        renderOptions(q.pool);
-    }
+        // 控制「上一題」按鈕顯示
+        const prevBtn = document.getElementById('prev-btn');
+        currentQIndex > 0 ? prevBtn.classList.remove('hidden') : prevBtn.classList.add('hidden');
 
-    function renderOptions(options) {
+        // 渲染選項
         const container = document.getElementById('options-container');
         container.innerHTML = '';
         
-        options.forEach((opt) => {
+        const currentSelections = finalAnswers[q.id] || [];
+        
+        q.pool.forEach(opt => {
             const div = document.createElement('div');
-            div.className = 'option-box';
+            div.className = 'option-box' + (currentSelections.includes(opt) ? ' selected' : '');
             div.innerText = opt;
-            div.onclick = () => toggleSelect(div, opt);
+            div.onclick = () => toggleSelect(div, opt, q);
             container.appendChild(div);
         });
+
+        updateButtonState();
     }
 
-    function toggleSelect(element, value) {
-        const q = questions[currentQIndex];
-        const max = q.multiSelect;
-
-        if (tempSelections.includes(value)) {
-            tempSelections = tempSelections.filter(item => item !== value);
-            element.classList.remove('selected');
+    function toggleSelect(element, value, q) {
+        let selections = finalAnswers[q.id] || [];
+    
+        if (selections.includes(value)) {
+            selections = selections.filter(item => item !== value);
         } else {
-            if (max === 1) {
-                // 單選邏輯：先清除所有選中狀態
-                const allBoxes = document.querySelectorAll('.option-box');
-                allBoxes.forEach(box => box.classList.remove('selected'));
-                tempSelections = [value];
-                element.classList.add('selected');
-            } else if (tempSelections.length < max) {
-                // 多選邏輯：增加至上限為止
-                tempSelections.push(value);
-                element.classList.add('selected');
+            if (q.multiSelect === 1) {
+                selections = [value];
+            } else if (selections.length < q.multiSelect) {
+                selections.push(value);
             }
         }
-        updateButtonState();
+        
+        finalAnswers[q.id] = selections;
+    
+        // 【新增】將目前的進度備份到 localStorage
+        localStorage.setItem('survey_backup', JSON.stringify(finalAnswers));
+        
+        renderQuestion();
     }
 
     function updateButtonState() {
         const btn = document.getElementById('next-btn');
         const q = questions[currentQIndex];
-        const count = tempSelections.length;
-        const max = q.multiSelect;
+        const count = (finalAnswers[q.id] || []).length;
 
-        if (count === max) {
-            btn.innerText = "下一步";
+        if (count === q.multiSelect) {
+            btn.innerText = (currentQIndex === questions.length - 1) ? "提交並查看結果" : "下一步";
             btn.classList.add('active');
             btn.disabled = false;
         } else {
-            btn.innerText = `還需選擇 ${max - count} 個`;
+            btn.innerText = `還需選擇 ${q.multiSelect - count} 個`;
             btn.classList.remove('active');
             btn.disabled = true;
         }
     }
 
-    function goToNextQuestion() {
-        const q = questions[currentQIndex];
-        tempSelections.forEach(ans => {
-            finalAnswers.push({ question: q.id, answer: ans });
-        });
+    function goToNextStep() {
+        if (currentQIndex < questions.length - 1) {
+            // 切換 Hash，觸發 hashchange 事件
+            window.location.hash = `step${currentQIndex + 2}`;
+        } else {
+            submitData();
+        }
+    }
 
-        currentQIndex++;
-        initQuestion();
+    function goBack() {
+        // 直接模擬瀏覽器回退
+        window.history.back();
     }
 
     async function submitData() {
@@ -249,23 +205,47 @@
         const webhookUrl = "https://default399232fb17d145cabda65b540441bd.62.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/55b4f53f3add49a6a7649d2a96347ba1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bOCEhYXI3SA1LK2swv-VEtDtgPBtEY78JEOhl3XRyzI";
         
         let payload = { "填答時間": new Date().toISOString() };
-        finalAnswers.forEach(s => { payload[s.answer] = "✔"; });
+        
+        // 整合 finalAnswers 物件到 payload (維持原始 ✔ 格式)
+        Object.values(finalAnswers).forEach(ansArray => {
+            ansArray.forEach(ans => { payload[ans] = "✔"; });
+        });
 
         try {
-            await fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (e) {
-            console.error("傳送失敗:", e);
+        // 3. 執行非同步發送
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            // --- 重點：發送成功後的處理 ---
+            
+            // A. 清除瀏覽器內的備份暫存，確保下次開啟是空的
+            localStorage.removeItem('survey_backup');
+            
+            // B. 改變網址 Hash，避免使用者按「上一頁」回到最後一題重複提交
+            window.location.hash = "finished";
+
+            // C. 顯示感謝畫面
+            document.getElementById('loading-section').classList.add('hidden');
+            document.getElementById('thank-you').classList.remove('hidden');
+        } else {
+            throw new Error("伺服器回應錯誤");
         }
 
-        document.getElementById('loading-section').classList.add('hidden');
-        document.getElementById('thank-you').classList.remove('hidden');
-    }
+    } catch (e) {
+        // 4. 錯誤處理：如果斷網或發送失敗
+        console.error("傳送失敗:", e);
+        
+        // 提示使用者，並讓他們可以嘗試重新發送（顯示回題目區或顯示錯誤提示）
+        alert("資料傳輸失敗，請檢查網路連線後重試。");
 
-    initQuestion();
+        document.getElementById('loading-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+    }
+    }        
 </script>
 
 </body>
